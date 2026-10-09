@@ -96,7 +96,6 @@ elif tipo_producto == "Retráctil":
     ancho = st.number_input("Ancho en m", min_value=0.0, value=0.200, step=0.001, format="%.3f")
     largo = st.number_input("Largo en m", min_value=0.0, value=0.400, step=0.001, format="%.3f")
     
-    # Coste materia prima = C5 * C8 * 1000
     coste_materia_prima = coste_ml * largo * 1000
 
     st.markdown("---")
