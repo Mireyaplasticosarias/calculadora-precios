@@ -114,6 +114,7 @@ elif tipo_producto == "Retráctil":
         key="ret_cant"
     )
 
+    # Tablas exactas para Retráctil según la fórmula BUSCARX de la imagen
     if material_opcion == "Liso":
         val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[tipo_fabricante]
         val_zona = {"Norte": 0.64, "Sur": 0.50}[zona_cliente]
