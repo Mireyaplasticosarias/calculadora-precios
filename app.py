@@ -252,5 +252,100 @@ elif tipo_producto == "Termoformado":
 
     st.metric(label="Precio de venta sugerido", value=f"{precio_venta_sugerido:.3f} €")
 
+elif tipo_producto == "Laminado no estándar":
+    st.header("1. Datos del Material - Laminado no estándar")
+    
+    tipo_lam_bolsa = st.selectbox("Lamina o bolsa", ["Lamina", "Bolsa"], key="lam_tipo")
+    
+    # 4 capas de materiales
+    materiales_disponibles = ["PET", "Al", "PE", "PP", "PA", "PE-EVOH", "PP-EVOH", "PET saran"]
+    densidades_dict = {
+        "PET": 1400, "Al": 2300, "PE": 950, "PP": 950, 
+        "PA": 1200, "PE-EVOH": 950, "PP-EVOH": 950, "PET saran": 1400
+    }
+    
+    st.subheader("Configuración de Capas (hasta 4)")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        mat1 = st.selectbox("Material 1", materiales_disponibles, index=4, key="m1") # PA default
+        micras1 = st.number_input("Micras 1", min_value=0.0, value=20.0, step=1.0, format="%.1f", key="mic1")
+        coste1 = st.number_input("Coste €/kg 1", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos1")
+        dens1 = densidades_dict.get(mat1, 0)
+        st.text(f"Densidad: {dens1}")
+        
+    with col2:
+        mat2 = st.selectbox("Material 2", materiales_disponibles, index=2, key="m2") # PP default
+        micras2 = st.number_input("Micras 2", min_value=0.0, value=30.0, step=1.0, format="%.1f", key="mic2")
+        coste2 = st.number_input("Coste €/kg 2", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos2")
+        dens2 = densidades_dict.get(mat2, 0)
+        st.text(f"Densidad: {dens2}")
+        
+    with col3:
+        mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=0, key="m3")
+        micras3 = st.number_input("Micras 3", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic3")
+        coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos3")
+        dens3 = densidades_dict.get(mat3, 0) if mat3 != "(Ninguno)" else 0
+        st.text(f"Densidad: {dens3}")
+        
+    with col4:
+        mat4 = st.selectbox("Material 4", ["(Ninguno)"] + materiales_disponibles, index=0, key="m4")
+        micras4 = st.number_input("Micras 4", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
+        coste4 = st.number_input("Coste €/kg 4", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos4")
+        dens4 = densidades_dict.get(mat4, 0) if mat4 != "(Ninguno)" else 0
+        st.text(f"Densidad: {dens4}")
+
+    st.markdown("---")
+    ancho_cliente = st.number_input("Ancho cliente en m.", min_value=0.0, value=0.720, step=0.001, format="%.3f", key="lam_ac")
+    ancho_bobina = st.number_input("Ancho de la bobina en m.", min_value=0.0, value=0.840, step=0.001, format="%.3f", key="lam_ab")
+    largo_bolsa = st.number_input("Largo en m. BOLSA", min_value=0.0, value=0.400, step=0.001, format="%.3f", key="lam_lb")
+    largo_lamina = 1.000 # Valor fijo 1m para lamina
+
+    # Cálculo de cortes: =SI(C5="Lamina";ENTERO(C12/C11);ENTERO(C12/C13))
+    if tipo_lam_bolsa == "Lamina":
+        cortes = int(ancho_bobina // ancho_cliente) if ancho_cliente > 0 else 0
+    else:
+        cortes = int(ancho_bobina // largo_bolsa) if largo_bolsa > 0 else 0
+
+    st.metric(label="Cortes", value=f"{cortes}")
+
+    # Recopilar listas de capas activas
+    capas_datos = []
+    if mat1 != "(Ninguno)" and micras1 > 0:
+        capas_datos.append((micras1, coste1, dens1))
+    if mat2 != "(Ninguno)" and micras2 > 0:
+        capas_datos.append((micras2, coste2, dens2))
+    if mat3 != "(Ninguno)" and mat3 != "" and micras3 > 0:
+        capas_datos.append((micras3, coste3, dens3))
+    if mat4 != "(Ninguno)" and mat4 != "" and micras4 > 0:
+        capas_datos.append((micras4, coste4, dens4))
+
+    if len(capas_datos) > 0 and cortes > 0:
+        suma_micras = sum([c[0] for c in capas_datos])
+        suma_producto_densidad = sum([c[0] * c[2] for c in capas_datos])
+        suma_producto_coste = sum([c[0] * c[1] for c in capas_datos])
+        
+        densidad_ponderada = suma_producto_densidad / suma_micras if suma_micras > 0 else 0
+        coste_kg = suma_producto_coste / suma_micras if suma_micras > 0 else 0
+        
+        mult_tipo = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
+        factor_tipo = 2000 if tipo_lam_bolsa == "Bolsa" else 1
+        
+        # Kg materia prima formula:
+        # =(C12/C14)*(SI(C5="Bolsa";C13;C15))*(SI(C5="Lamina";1; SI(C5="Bolsa"; 2000; "")))*((SUMA(C7:F7)*4)/4*10^-6)*1,03*((SUMAPRODUCTO(C7:F7;C9:F9)/(SUMA(C7:F7))))
+        kg_materia_prima = (ancho_bobina / cortes) * mult_tipo * factor_tipo * (suma_micras * 1e-6) * 1.03 * densidad_ponderada
+        
+        # Coste materia prima €/m formula:
+        coste_materia_prima_m = kg_materia_prima * coste_kg
+    else:
+        kg_materia_prima = 0.0
+        coste_kg = 0.0
+        coste_materia_prima_m = 0.0
+
+    st.markdown("---")
+    st.metric(label="Kg materia prima", value=f"{kg_materia_prima:.4f} Kg")
+    st.metric(label="Coste €/kg", value=f"{coste_kg:.3f} €")
+    st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.3f} €")
+
 else:
-    st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
+    st.info(f"Configuración para '{tipo_producto}' en desarrollo.")
