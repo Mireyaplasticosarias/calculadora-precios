@@ -15,16 +15,16 @@ st.divider()
 if tipo_producto == "Bolsas estándar-coextruido":
     st.header("1. Datos del Material - Bolsas estándar")
     
-    # Inputs con 3 decimales y nombres limpios sin corchetes
-    coste_m2 = st.number_input("Coste €/m2", min_value=0.0, value=0.500, step=0.001, format="%.3f")
+    # C5, C6, C7, C8
+    coste_m2 = st.number_input("Coste €/m2", min_value=0.0, value=0.273, step=0.001, format="%.3f")
     ancho_cliente = st.number_input("Ancho cliente en m", min_value=0.0, value=0.150, step=0.001, format="%.3f")
     ancho_material = st.number_input("Ancho material en m", min_value=0.0, value=1.200, step=0.001, format="%.3f")
     largo = st.number_input("Largo en m", min_value=0.0, value=0.300, step=0.001, format="%.3f")
     
-    # Número de cortes = ENTERO(C7 / C8)
+    # C9: Cortes = ENTERO(C7 / C8)
     cortes = int(ancho_material // largo) if largo > 0 else 0
         
-    # Coste materia prima exacto del Excel: =C5 * (C7 / C9) * C6 * 1000 * 2
+    # C11: Coste materia prima = C5 * (C7 / C9) * C6 * 1000 * 2
     if cortes > 0:
         coste_materia_prima = coste_m2 * (ancho_material / cortes) * ancho_cliente * 1000 * 2
     else:
@@ -37,16 +37,16 @@ if tipo_producto == "Bolsas estándar-coextruido":
     st.markdown("---")
     st.header("2. Variables Comerciales")
     
-    # Selectores limpios sin corchetes
+    # C14, C15, C16, C17
     material_opcion = st.selectbox("Material laminado o impreso", ["Liso", "Impreso"])
-    tipo_fabricante = st.selectbox("Tipo de fabricante", ["Multinacional", "Transformador", "Distribuidor"])
-    zona_cliente = st.selectbox("Zona del cliente", ["Norte", "Sur"])
+    tipo_fabricante = st.selectbox("Tipo de fabricante", ["Transformador", "Multinacional", "Distribuidor"])
+    zona_cliente = st.selectbox("Zona del cliente", ["Sur", "Norte"])
     cantidad_bolsas = st.selectbox(
         "Cantidad bolsas", 
         ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"]
     )
 
-    # Lógica de tablas de búsqueda del Excel para el Markup exacto
+    # Búsquedas en tablas (equivalente a BUSCARX del Excel)
     if material_opcion == "Liso":
         val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[tipo_fabricante]
         val_zona = {"Norte": 0.64, "Sur": 0.50}[zona_cliente]
@@ -66,6 +66,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
             "mas de 30000": 0.65
         }[cantidad_bolsas]
 
+    # C20: Markup calculado
     markup_calculado = val_fab + val_zona + val_cant
 
     st.markdown("---")
@@ -73,23 +74,24 @@ if tipo_producto == "Bolsas estándar-coextruido":
     
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-    # Casilla para markup propuesto (actúa como C21 en Excel)
-    usar_markup_manual = st.checkbox("Modificar Markup manualmente")
+    # C21: Markup propuesto (campo numérico directo, si se deja en 0 o vacío actúa como celda vacía)
+    usar_manual = st.checkbox("Modificar C21 (Markup propuesto)")
     
-    if usar_markup_manual:
+    if usar_manual:
         markup_propuesto = st.number_input(
-            "Markup propuesto",
-            min_value=1.0,
-            value=float(markup_calculado),
+            "Markup propuesto (C21)",
+            min_value=0.0,
+            value=1.400,
             step=0.001,
             format="%.3f"
         )
-        # Fórmula Excel: =SI(C21=""; C20*C11; C21*C11)
+        # Fórmula Excel C23: =C21 * C11
         precio_1000_bolsas = markup_propuesto * coste_materia_prima
     else:
+        # Fórmula Excel C23: =C20 * C11
         precio_1000_bolsas = markup_calculado * coste_materia_prima
 
-    # Fórmula Excel: =C23 / 1000
+    # C24: Precio de venta sugerido ml = C23 / 1000
     precio_ml = precio_1000_bolsas / 1000
 
     st.metric(label="Precio de venta sugerido 1000 bolsas", value=f"{precio_1000_bolsas:.3f} €")
