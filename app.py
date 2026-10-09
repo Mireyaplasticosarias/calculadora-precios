@@ -4,7 +4,7 @@ st.set_page_config(page_title="Calculadora de Precios - Plásticos Arias", layou
 
 st.title("Calculadora de Precios - Plásticos Arias")
 
-# Selección del Producto
+# Seleccion del Producto
 tipo_producto = st.selectbox(
     "Selecciona el Tipo de Producto:",
     ["Bolsas estándar-coextruido", "Retráctil", "Termoformado", "Laminado no estándar"]
@@ -300,7 +300,7 @@ elif tipo_producto == "Laminado no estándar":
     largo_bolsa = st.number_input("Largo en m. BOLSA", min_value=0.0, value=0.400, step=0.001, format="%.3f", key="lam_lb")
     largo_lamina = 1.000
 
-    # Cortes: =SI(C5="Lamina";ENTERO(C12/C11);ENTERO(C12/C13))
+    # Cortes: =IF(C5="Lamina",INT(C12/C11),INT(C12/C13))
     if tipo_lam_bolsa == "Lamina":
         cortes = int(ancho_bobina // ancho_cliente) if ancho_cliente > 0 else 0
     else:
@@ -326,7 +326,7 @@ elif tipo_producto == "Laminado no estándar":
         densidad_ponderada = suma_producto_densidad / suma_micras if suma_micras > 0 else 0
         coste_kg = suma_producto_coste / suma_micras if suma_micras > 0 else 0
         
-        # Factores exactos de tus fórmulas de Excel
+        # Exactni faktori ot Excel formulyatata
         factor_largo_kg = largo_bolsa if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_largo_costem = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_cantidad = 2000 if tipo_lam_bolsa == "Bolsa" else 1
@@ -337,7 +337,7 @@ elif tipo_producto == "Laminado no estándar":
         # Coste €/kg
         coste_kg_final = coste_kg
         
-        # Coste materia prima €/m (usando C11 para Bolsa y C15 para Lámina)
+        # Coste materia prima €/m (izpolzva C11 za Bolsa i C15 za Lamina)
         coste_materia_prima_m = (ancho_bobina / cortes) * factor_largo_costem * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada * coste_kg
     else:
         kg_materia_prima = 0.0
@@ -350,4 +350,4 @@ elif tipo_producto == "Laminado no estándar":
     st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.3f} €")
 
 else:
-    st.info(f"Configuración para '{tipo_producto}' en desarrollo.")
+    st.info(f"Configuracion dori '{tipo_producto}' v razrabotka.")
