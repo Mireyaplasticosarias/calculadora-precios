@@ -17,27 +17,24 @@ if tipo_producto == "Bolsas estándar-coextruido":
     
     tipo_impresion = st.radio("Tipo de acabado:", ["Liso", "Impreso"], horizontal=True)
     
-    # Inputs específicos del Excel para Coextruido
-    coste_m2 = st.number_input("Coste (€/m2)", min_value=0.0, value=0.50, step=0.01)
-    ancho_cliente = st.number_input("Ancho cliente en m", min_value=0.0, value=0.30, step=0.01)
-    ancho_material = st.number_input("Ancho material en m", min_value=0.0, value=1.20, step=0.01)
-    largo = st.number_input("Largo en m", min_value=0.0, value=0.50, step=0.01)
+    # Inputs específicos del Excel con 3 decimales
+    coste_m2 = st.number_input("Coste (€/m2)", min_value=0.0, value=0.500, step=0.001, format="%.3f")
+    ancho_cliente = st.number_input("Ancho cliente en m", min_value=0.0, value=0.300, step=0.001, format="%.3f")
+    ancho_material = st.number_input("Ancho material en m", min_value=0.0, value=1.200, step=0.001, format="%.3f")
+    largo = st.number_input("Largo en m", min_value=0.0, value=0.500, step=0.001, format="%.3f")
     
-    # Cálculos automáticos
-    # Cálculo de cortes (evitando división por cero)
-    cortes = int(ancho_material // ancho_cliente) if ancho_cliente > 0 else 1
-    if cortes < 1:
-        cortes = 1
+    # Cálculos automáticos ajustados
+    # Número de cortes = Ancho material en m / Largo en m
+    cortes = (ancho_material / largo) if largo > 0 else 0.0
         
-    # Coste de la materia prima (fórmula basada en dimensiones y cortes)
-    # Área por bolsa / pieza ajustada por cortes y coste m2
+    # Coste de la materia prima
     area_pieza = ancho_cliente * largo
     coste_materia_prima = (area_pieza * coste_m2) / cortes if cortes > 0 else 0.0
 
     st.markdown("---")
     st.subheader("Resultados de Cálculos de Materia Prima")
-    st.metric(label="Número de Cortes", value=f"{cortes}")
-    st.metric(label="Coste de la Materia Prima (€)", value=f"{coste_materia_prima:.4f} €")
+    st.metric(label="Número de Cortes", value=f"{cortes:.3f}")
+    st.metric(label="Coste de la Materia Prima (€)", value=f"{coste_materia_prima:.3f} €")
 
     st.markdown("---")
     st.subheader("2. Costes Variables y Opciones de Markup")
@@ -61,13 +58,14 @@ if tipo_producto == "Bolsas estándar-coextruido":
             "Introduce Markup manual:",
             min_value=1.0,
             value=float(markup_base),
-            step=0.01,
+            step=0.001,
+            format="%.3f",
             help="El mínimo recomendado para este tipo es acorde a las reglas internas."
         )
-        st.text(f"Markup sugerido por sistema: {markup_base:.2f}x")
+        st.text(f"Markup sugerido por sistema: {markup_base:.3f}x")
     else:
         markup_final = markup_base
-        st.text(f"Markup aplicado automáticamente: {markup_final:.2f}x")
+        st.text(f"Markup aplicado automáticamente: {markup_final:.3f}x")
 
     st.markdown("---")
     st.subheader("3. Precios de Venta Sugeridos")
@@ -76,13 +74,11 @@ if tipo_producto == "Bolsas estándar-coextruido":
     precio_venta_base = coste_materia_prima * markup_final
     
     # Supuestos de conversión a 1,000 bolsas y por metro lineal (ml)
-    # (Ajustar según la fórmula exacta de vuestro Excel si difiere el factor multiplicador)
     precio_1000_bolsas = precio_venta_base * 1000
     precio_ml = precio_venta_base / largo if largo > 0 else 0.0
 
-    st.metric(label="Precio de Venta Sugerido (1.000 bolsas)", value=f"{precio_1000_bolsas:,.2f} €")
-    st.metric(label="Precio de Venta Sugerido por metro lineal (ml)", value=f"{precio_ml:,.4f} €")
+    st.metric(label="Precio de Venta Sugerido (1.000 bolsas)", value=f"{precio_1000_bolsas:.3f} €")
+    st.metric(label="Precio de Venta Sugerido por metro lineal (ml)", value=f"{precio_ml:.3f} €")
 
 else:
-    # Espacio reservado para los otros 3 productos (Retráctil, Termoformado, Laminado)
     st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
