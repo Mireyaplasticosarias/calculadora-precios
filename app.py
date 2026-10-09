@@ -4,7 +4,7 @@ st.set_page_config(page_title="Calculadora de Precios - Plásticos Arias", layou
 
 st.title("Calculadora de Precios - Plásticos Arias")
 
-# Seleccion del Producto
+# Selección del Producto
 tipo_producto = st.selectbox(
     "Selecciona el Tipo de Producto:",
     ["Bolsas estándar-coextruido", "Retráctil", "Termoformado", "Laminado no estándar"]
@@ -269,42 +269,44 @@ elif tipo_producto == "Laminado no estándar":
     with col1:
         mat1 = st.selectbox("Material 1", materiales_disponibles, index=4, key="m1")
         micras1 = st.number_input("Micras 1", min_value=0.0, value=20.0, step=1.0, format="%.1f", key="mic1")
-        coste1 = st.number_input("Coste €/kg 1", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos1")
+        coste1 = st.number_input("Coste €/kg 1", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos1")
         dens1 = densidades_dict.get(mat1, 0)
         st.text(f"Densidad: {dens1}")
         
     with col2:
-        mat2 = st.selectbox("Material 2", materiales_disponibles, index=2, key="m2")
+        mat2 = st.selectbox("Material 2", materiales_disponibles, index=3, key="m2")
         micras2 = st.number_input("Micras 2", min_value=0.0, value=30.0, step=1.0, format="%.1f", key="mic2")
-        coste2 = st.number_input("Coste €/kg 2", min_value=0.0, value=2.700, step=0.001, format="%.3f", key="cos2")
+        coste2 = st.number_input("Coste €/kg 2", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos2")
         dens2 = densidades_dict.get(mat2, 0)
         st.text(f"Densidad: {dens2}")
         
     with col3:
-        mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=5, key="m3")
-        micras3 = st.number_input("Micras 3", min_value=0.0, value=25.0, step=1.0, format="%.1f", key="mic3")
-        coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos3")
+        mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=0, key="m3")
+        micras3 = st.number_input("Micras 3", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic3")
+        coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=0.000, step=0.001, format="%.3f", key="cos3")
         dens3 = densidades_dict.get(mat3, 0) if mat3 != "(Ninguno)" else 0
         st.text(f"Densidad: {dens3}")
         
     with col4:
         mat4 = st.selectbox("Material 4", ["(Ninguno)"] + materiales_disponibles, index=0, key="m4")
         micras4 = st.number_input("Micras 4", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
-        coste4 = st.number_input("Coste €/kg 4", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos4")
+        coste4 = st.number_input("Coste €/kg 4", min_value=0.0, value=0.000, step=0.001, format="%.3f", key="cos4")
         dens4 = densidades_dict.get(mat4, 0) if mat4 != "(Ninguno)" else 0
         st.text(f"Densidad: {dens4}")
 
     st.markdown("---")
-    ancho_cliente = st.number_input("Ancho cliente en m.", min_value=0.0, value=0.720, step=0.001, format="%.3f", key="lam_ac")
+    ancho_cliente = st.number_input("Ancho cliente en m.", min_value=0.0, value=0.715, step=0.001, format="%.3f", key="lam_ac")
     ancho_bobina = st.number_input("Ancho de la bobina en m.", min_value=0.0, value=0.840, step=0.001, format="%.3f", key="lam_ab")
     largo_bolsa = st.number_input("Largo en m. BOLSA", min_value=0.0, value=0.400, step=0.001, format="%.3f", key="lam_lb")
-    largo_lamina = 1.000
+    largo_lamina = st.number_input("Largo LAMINA", min_value=0.0, value=1.000, step=0.001, format="%.3f", key="lam_ll")
 
     # Cortes: =IF(C5="Lamina",INT(C12/C11),INT(C12/C13))
     if tipo_lam_bolsa == "Lamina":
-        cortes = int(ancho_bobina // ancho_cliente) if ancho_cliente > 0 else 0
+        cortes = int(ancho_bobina // ancho_cliente) if ancho_cliente > 0 else 1
     else:
-        cortes = int(ancho_bobina // largo_bolsa) if largo_bolsa > 0 else 0
+        cortes = int(ancho_bobina // largo_bolsa) if largo_bolsa > 0 else 1
+    if cortes < 1: 
+        cortes = 1
 
     st.metric(label="Cortes", value=f"{cortes}")
 
@@ -326,18 +328,18 @@ elif tipo_producto == "Laminado no estándar":
         densidad_ponderada = suma_producto_densidad / suma_micras if suma_micras > 0 else 0
         coste_kg = suma_producto_coste / suma_micras if suma_micras > 0 else 0
         
-        # Exactni faktori ot Excel formulyatata
+        # Factores idénticos a los de Excel:
+        # Kg materia prima: =(C12/C14)*(IF(C5="Bolsa",C13,C15))*(IF(C5="Lamina",1, IF(C5="Bolsa", 2000, "")))*((SUM(C7:F7)*4)/4*10^-6)*1.03*((SUMPRODUCT(C7:F7,C9:F9)/(SUM(C7:F7))))
         factor_largo_kg = largo_bolsa if tipo_lam_bolsa == "Bolsa" else largo_lamina
-        factor_largo_costem = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_cantidad = 2000 if tipo_lam_bolsa == "Bolsa" else 1
         
-        # Kg materia prima
         kg_materia_prima = (ancho_bobina / cortes) * factor_largo_kg * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada
         
-        # Coste €/kg
+        # Coste €/kg: =((SUMPRODUCT(C7:F7,C8:F8)/(SUM(C7:F7))))
         coste_kg_final = coste_kg
         
-        # Coste materia prima €/m (izpolzva C11 za Bolsa i C15 za Lamina)
+        # Coste materia prima €/m: =(C12/C14)*(IF(C5="Bolsa",C11,C15))*(IF(C5="Lamina",1, IF(C5="Bolsa", 2000, "")))*((SUM(C7:F7)*4)/4*10^-6)*1.03*((SUMPRODUCT(C7:F7,C9:F9)/(SUM(C7:F7))))*((SUMPRODUCT(C7:F7,C8:F8)/(SUM(C7:F7))))
+        factor_largo_costem = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
         coste_materia_prima_m = (ancho_bobina / cortes) * factor_largo_costem * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada * coste_kg
     else:
         kg_materia_prima = 0.0
@@ -345,9 +347,9 @@ elif tipo_producto == "Laminado no estándar":
         coste_materia_prima_m = 0.0
 
     st.markdown("---")
-    st.metric(label="Kg materia prima", value=f"{kg_materia_prima:.4f} Kg")
+    st.metric(label="Kg materia prima", value=f"{kg_materia_prima:.6f} Kg")
     st.metric(label="Coste €/kg", value=f"{coste_kg_final:.3f} €")
-    st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.3f} €")
+    st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.7f} €")
 
 else:
-    st.info(f"Configuracion dori '{tipo_producto}' v razrabotka.")
+    st.info(f"Configuración para '{tipo_producto}' en desarrollo.")
