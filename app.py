@@ -114,7 +114,6 @@ elif tipo_producto == "Retráctil":
         key="ret_cant"
     )
 
-    # Tablas exactas para Retráctil según la fórmula BUSCARX de la imagen
     if material_opcion == "Liso":
         val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[tipo_fabricante]
         val_zona = {"Norte": 0.64, "Sur": 0.50}[zona_cliente]
@@ -142,7 +141,7 @@ elif tipo_producto == "Retráctil":
     st.caption("Liso: mínimo 1,42")
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-    usar_manual = st.checkbox("Modificar Markup propuesto", key="ret_mod")
+    usar_manual = st.checkbox("Modificar Markup propuesto (C20)", key="ret_mod")
     
     if usar_manual:
         markup_propuesto = st.number_input(
@@ -153,8 +152,10 @@ elif tipo_producto == "Retráctil":
             format="%.3f",
             key="ret_mprop"
         )
+        # Si C20 tiene valor, se usa C20 * C10
         precio_venta_sugerido = markup_propuesto * coste_materia_prima
     else:
+        # Si C20 está vacío (no se usa manual), se usa C19 * C10
         precio_venta_sugerido = markup_calculado * coste_materia_prima
 
     st.metric(label="Precio de venta sugerido", value=f"{precio_venta_sugerido:.3f} €")
