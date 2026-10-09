@@ -95,7 +95,6 @@ elif tipo_producto == "Retráctil":
     ancho = st.number_input("Ancho en m", min_value=0.0, value=0.200, step=0.001, format="%.3f")
     largo = st.number_input("Largo en m", min_value=0.0, value=0.400, step=0.001, format="%.3f")
     
-    # Coste materia prima = C5 * C8 * 1000
     coste_materia_prima = coste_ml * largo * 1000
 
     st.markdown("---")
@@ -151,13 +150,38 @@ elif tipo_producto == "Retráctil":
             format="%.3f",
             key="ret_mprop"
         )
-        # Si C20 tiene valor, se usa C20 * C10
         precio_venta_sugerido = markup_propuesto * coste_materia_prima
     else:
-        # Si C20 está vacío (no se usa manual), se usa C19 * C10
         precio_venta_sugerido = markup_calculado * coste_materia_prima
 
     st.metric(label="Precio de venta sugerido", value=f"{precio_venta_sugerido:.3f} €")
+
+elif tipo_producto == "Termoformado":
+    st.header("Datos del Material - Termoformado")
+    
+    origen_material = st.selectbox("Origen del material", ["Fabricado", "Comprado"], key="termo_origen")
+    
+    if origen_material == "Fabricado":
+        st.subheader("1. Datos del Material Fabricado")
+        
+        coste_m2_repo = st.number_input("Coste €/m2 reposición", min_value=0.0, value=0.630, step=0.001, format="%.3f", key="termo_fab_c2")
+        ancho_cliente = st.number_input("Ancho cliente (m.)", min_value=0.0, value=0.535, step=0.001, format="%.3f", key="termo_fab_c3")
+        ancho_material = st.number_input("Ancho material (m.)", min_value=0.0, value=1.110, step=0.001, format="%.3f", key="termo_fab_c4")
+        
+        cortes = int(ancho_material // ancho_cliente) if ancho_cliente > 0 else 0
+        
+        if cortes > 0:
+            coste_materia_prima = coste_m2_repo * ancho_material / cortes
+        else:
+            coste_materia_prima = 0.0
+
+        st.markdown("---")
+        st.metric(label="Número de Cortes", value=f"{cortes}")
+        st.metric(label="Coste materia prima", value=f"{coste_materia_prima:.3f} €")
+        
+        st.info("Variables comerciales y precios de Termoformado pendientes de integrar.")
+    else:
+        st.info("Configuración para Termoformado - Comprado en desarrollo.")
 
 else:
     st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
