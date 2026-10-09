@@ -222,13 +222,14 @@ elif tipo_producto == "Termoformado":
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
-    st.caption("Liso: mínimo 1,22 - Impreso: mínimo 2")
-            
+    if material_opcion == "Liso":
+        st.caption("Liso: mínimo 1,22 — máximo 1,55")
+    else:
+        st.caption("Impreso: mínimo 2 — máximo 2,46")
+        
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-
-
-    usar_manual = st.checkbox("Modificar Markup", key="termo_mod")
+    usar_manual = st.checkbox("Modificar Markup propuesto", key="termo_mod")
     
     if usar_manual:
         markup_propuesto = st.number_input(
@@ -239,9 +240,15 @@ elif tipo_producto == "Termoformado":
             format="%.3f",
             key="termo_mprop"
         )
-        precio_venta_sugerido = markup_propuesto * coste_materia_prima
+        if origen_material == "Fabricado":
+            precio_venta_sugerido = coste_materia_prima * (markup_propuesto * 1.07)
+        else:
+            precio_venta_sugerido = coste_materia_prima * markup_propuesto
     else:
-        precio_venta_sugerido = markup_calculado * coste_materia_prima
+        if origen_material == "Fabricado":
+            precio_venta_sugerido = coste_materia_prima * (markup_calculado * 1.07)
+        else:
+            precio_venta_sugerido = coste_materia_prima * markup_calculado
 
     st.metric(label="Precio de venta sugerido", value=f"{precio_venta_sugerido:.3f} €")
 
