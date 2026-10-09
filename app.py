@@ -1,9 +1,16 @@
 import streamlit as st
 
 st.set_page_config(page_title="Calculadora de Precios - Plásticos Arias", layout="centered")
-st.image("Flexible packagiing.png", width=180)
 
-st.title("Calculadora de Precios - Plásticos Arias")
+col_logo, col_titulo = st.columns([1, 3])
+
+with col_logo:
+    st.image("Flexible packagiing.png", width=140)
+
+with col_titulo:
+    st.markdown("## Calculadora de Precios - Plásticos Arias")
+
+st.divider()
 
 # Selección del Producto
 tipo_producto = st.selectbox(
