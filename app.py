@@ -19,7 +19,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
     coste_m2 = st.number_input("Coste €/m2 [C5]", min_value=0.0, value=0.500, step=0.001, format="%.3f")
     ancho_cliente = st.number_input("Ancho cliente en m [C6]", min_value=0.0, value=0.150, step=0.001, format="%.3f")
     ancho_material = st.number_input("Ancho material en m [C7]", min_value=0.0, value=1.200, step=0.001, format="%.3f")
-    largo = st.number_input("Ancho / Largo en m [C8]", min_value=0.0, value=0.300, step=0.001, format="%.3f")
+    largo = st.number_input("Largo en m [C8]", min_value=0.0, value=0.300, step=0.001, format="%.3f")
     
     # Número de cortes = ENTERO(C7 / C8)
     cortes = int(ancho_material // largo) if largo > 0 else 0
@@ -52,9 +52,8 @@ if tipo_producto == "Bolsas estándar-coextruido":
         ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"]
     )
 
-    # Lógica de tablas de búsqueda del Excel para el Markup
+    # Lógica de tablas de búsqueda del Excel para el Markup exacto
     if material_opcion == "Liso":
-        # Tablas Liso
         val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[tipo_fabricante]
         val_zona = {"Norte": 0.64, "Sur": 0.50}[zona_cliente]
         val_cant = {
@@ -64,7 +63,6 @@ if tipo_producto == "Bolsas estándar-coextruido":
             "mas de 30000": 0.42
         }[cantidad_bolsas]
     else:
-        # Tablas Impreso
         val_fab = {"Multinacional": 0.89, "Transformador": 0.79, "Distribuidor": 0.70}[tipo_fabricante]
         val_zona = {"Norte": 0.79, "Sur": 0.65}[zona_cliente]
         val_cant = {
@@ -80,7 +78,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
-    st.metric(label="Markup calculado [C20]", value=f"{markup_calculado:.3f}")
+    st.metric(label="Markup [C20]", value=f"{markup_calculado:.3f}")
 
     # Opción de sobreescritura manual (Markup propuesto)
     usar_markup_manual = st.checkbox("¿Modificar Markup manualmente? [C21]")
@@ -99,7 +97,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
 
     # Fórmulas finales de precios de venta
     precio_1000_bolsas = coste_materia_prima * markup_final
-    precio_ml = precio_1000_bolsas / 1000  # O la relación proporcional que corresponda por ml
+    precio_ml = precio_1000_bolsas / 1000
 
     st.metric(label="Precio de venta sugerido 1000 bolsas [C23]", value=f"{precio_1000_bolsas:.3f} €")
     st.metric(label="Precio de venta sugerido ml [C24]", value=f"{precio_ml:.3f} €")
