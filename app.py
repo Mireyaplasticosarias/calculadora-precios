@@ -4,7 +4,6 @@ st.set_page_config(page_title="Calculadora de Precios - Plásticos Arias", layou
 
 st.title("Calculadora de Precios - Plásticos Arias")
 
-# Selección del Producto
 tipo_producto = st.selectbox(
     "Selecciona el Tipo de Producto:",
     ["Bolsas estándar-coextruido", "Retráctil", "Termoformado", "Laminado no estándar"]
@@ -103,7 +102,7 @@ elif tipo_producto == "Retráctil":
 
     st.markdown("---")
     st.header("2. Variables Comerciales y Precios")
-    st.info("Configuración de variables comerciales para Retráctil en proceso de integración.")
+    st.info("Configuración de variables comerciales para Retráctil en desarrollo.")
 
 else:
-    st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
+    st.info(f"Configuración para '{tipo_producto}' en desarrollo.")
