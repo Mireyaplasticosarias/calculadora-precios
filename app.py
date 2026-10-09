@@ -141,7 +141,7 @@ elif tipo_producto == "Retráctil":
     st.caption("Liso: mínimo 1,42 - Impreso: mínimo 2")
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-    usar_manual = st.checkbox("Modificar Markup propuesto (C20)", key="ret_mod")
+    usar_manual = st.checkbox("Modificar Markup", key="ret_mod")
     
     if usar_manual:
         markup_propuesto = st.number_input(
