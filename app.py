@@ -157,14 +157,12 @@ elif tipo_producto == "Retráctil":
     st.metric(label="Precio de venta sugerido", value=f"{precio_venta_sugerido:.3f} €")
 
 elif tipo_producto == "Termoformado":
-    st.header("Datos del Material - Termoformado")
+    st.header("1. Datos del Material - Termoformado")
     
     origen_material = st.selectbox("Origen del material", ["Fabricado", "Comprado"], key="termo_origen")
     
     if origen_material == "Fabricado":
-        st.subheader("1. Datos del Material Fabricado")
-        
-        coste_m2_repo = st.number_input("Coste €/m2 reposición", min_value=0.0, value=0.630, step=0.001, format="%.3f", key="termo_fab_c2")
+        coste_m2_repo = st.number_input("Coste €/m2 reposición", min_value=0.0, value=0.700, step=0.001, format="%.3f", key="termo_fab_c2")
         ancho_cliente = st.number_input("Ancho cliente (m.)", min_value=0.0, value=0.535, step=0.001, format="%.3f", key="termo_fab_c3")
         ancho_material = st.number_input("Ancho material (m.)", min_value=0.0, value=1.110, step=0.001, format="%.3f", key="termo_fab_c4")
         
@@ -175,13 +173,78 @@ elif tipo_producto == "Termoformado":
         else:
             coste_materia_prima = 0.0
 
-        st.markdown("---")
         st.metric(label="Número de Cortes", value=f"{cortes}")
         st.metric(label="Coste materia prima", value=f"{coste_materia_prima:.3f} €")
-        
-        st.info("Variables comerciales y precios de Termoformado pendientes de integrar.")
     else:
-        st.info("Configuración para Termoformado - Comprado en desarrollo.")
+        coste_compra = st.number_input("Precio de compra (€ m.l.)", min_value=0.0, value=0.180, step=0.001, format="%.3f", key="termo_comp")
+        coste_materia_prima = coste_compra
+        st.metric(label="Coste materia prima", value=f"{coste_materia_prima:.3f} €")
+
+    st.markdown("---")
+    st.header("2. Variables Comerciales")
+    
+    material_opcion = st.selectbox("Material laminado o impreso", ["Liso", "Impreso"], key="termo_mat")
+    tipo_fabricante = st.selectbox("Tipo de fabricante", ["Multinacional", "Transformador", "Distribuidor"], key="termo_fab")
+    zona_cliente = st.selectbox("Zona del cliente", ["Norte", "Sur"], key="termo_zona")
+    sector_cliente = st.selectbox("Sector", ["Pescado/pet food/quimicos", "Carne/lacteos/embutido"], key="termo_sec")
+    tamano_cliente = st.selectbox("Tamaño", ["Pequeña", "Grande"], key="termo_tam")
+    cantidad_opcion = st.selectbox(
+        "Cantidad", 
+        ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"],
+        key="termo_cant"
+    )
+
+    if material_opcion == "Liso":
+        val_fab = {"Multinacional": 0.317, "Transformador": 0.281, "Distribuidor": 0.244}[tipo_fabricante]
+        val_zona = {"Norte": 0.281, "Sur": 0.244}[zona_cliente]
+        val_sec = {"Pescado/pet food/quimicos": 0.281, "Carne/lacteos/embutido": 0.244}[sector_cliente]
+        val_tam = {"Pequeña": 0.281, "Grande": 0.244}[tamano_cliente]
+        val_cant = {
+            "menos de 10000": 0.354, 
+            "10000 - 20000": 0.317, 
+            "20000 - 30000": 0.281, 
+            "mas de 30000": 0.244
+        }[cantidad_opcion]
+    else:
+        val_fab = {"Multinacional": 0.520, "Transformador": 0.461, "Distribuidor": 0.400}[tipo_fabricante]
+        val_zona = {"Norte": 0.461, "Sur": 0.400}[zona_cliente]
+        val_sec = {"Pescado/pet food/quimicos": 0.461, "Carne/lacteos/embutido": 0.400}[sector_cliente]
+        val_tam = {"Pequeña": 0.461, "Grande": 0.400}[tamano_cliente]
+        val_cant = {
+            "menos de 10000": 0.580, 
+            "10000 - 20000": 0.520, 
+            "20000 - 30000": 0.461, 
+            "mas de 30000": 0.400
+        }[cantidad_opcion]
+
+    markup_calculado = val_fab + val_zona + val_sec + val_tam + val_cant
+
+    st.markdown("---")
+    st.header("3. Markup y Precio de Venta")
+    
+    if material_opcion == "Liso":
+        st.caption("Liso: mínimo 1,22 — máximo 1,55")
+    else:
+        st.caption("Impreso: mínimo 2 — máximo 2,46")
+        
+    st.metric(label="Markup", value=f"{markup_calculado:.3f}")
+
+    usar_manual = st.checkbox("Modificar Markup propuesto", key="termo_mod")
+    
+    if usar_manual:
+        markup_propuesto = st.number_input(
+            "Markup propuesto",
+            min_value=0.0,
+            value=1.404,
+            step=0.001,
+            format="%.3f",
+            key="termo_mprop"
+        )
+        precio_venta_sugerido = markup_propuesto * coste_materia_prima
+    else:
+        precio_venta_sugerido = markup_calculado * coste_materia_prima
+
+    st.metric(label="Precio de venta sugerido", value=f"{precio_venta_sugerido:.3f} €")
 
 else:
     st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
