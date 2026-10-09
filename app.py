@@ -23,9 +23,8 @@ if tipo_producto == "Bolsas estándar-coextruido":
     ancho_material = st.number_input("Ancho material en m", min_value=0.0, value=1.200, step=0.001, format="%.3f")
     largo = st.number_input("Largo en m", min_value=0.0, value=0.500, step=0.001, format="%.3f")
     
-    # Cálculos automáticos ajustados
-    # Número de cortes = Ancho material en m / Largo en m
-    cortes = (ancho_material / largo) if largo > 0 else 0.0
+    # Cálculo de cortes como número entero (=ENTERO(Ancho material / Largo))
+    cortes = int(ancho_material // largo) if largo > 0 else 0
         
     # Coste de la materia prima
     area_pieza = ancho_cliente * largo
@@ -33,7 +32,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
 
     st.markdown("---")
     st.subheader("Resultados de Cálculos de Materia Prima")
-    st.metric(label="Número de Cortes", value=f"{cortes:.3f}")
+    st.metric(label="Número de Cortes", value=f"{cortes}")
     st.metric(label="Coste de la Materia Prima (€)", value=f"{coste_materia_prima:.3f} €")
 
     st.markdown("---")
