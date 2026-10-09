@@ -92,7 +92,6 @@ elif tipo_producto == "Retráctil":
     st.header("1. Datos del Material - Retráctil")
     
     coste_ml = st.number_input("Coste €/ml", min_value=0.0, value=0.500, step=0.001, format="%.3f")
-    espesor = st.number_input("Espesor", min_value=0.0, value=45.0, step=1.0, format="%.1f")
     ancho = st.number_input("Ancho en m", min_value=0.0, value=0.200, step=0.001, format="%.3f")
     largo = st.number_input("Largo en m", min_value=0.0, value=0.400, step=0.001, format="%.3f")
     
