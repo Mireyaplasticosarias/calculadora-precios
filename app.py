@@ -15,16 +15,13 @@ st.divider()
 if tipo_producto == "Bolsas estándar-coextruido":
     st.header("1. Datos del Material - Bolsas estándar")
     
-    # C5, C6, C7, C8 (con el texto solicitado en el largo)
     coste_m2 = st.number_input("Coste €/m2", min_value=0.0, value=0.273, step=0.001, format="%.3f")
     ancho_cliente = st.number_input("Ancho cliente en m", min_value=0.0, value=0.150, step=0.001, format="%.3f")
     ancho_material = st.number_input("Ancho material en m", min_value=0.0, value=1.200, step=0.001, format="%.3f")
     largo = st.number_input("Largo en m (Si es lámina = 1)", min_value=0.0, value=0.300, step=0.001, format="%.3f")
     
-    # C9: Cortes = ENTERO(C7 / C8)
     cortes = int(ancho_material // largo) if largo > 0 else 0
         
-    # C11: Coste materia prima = C5 * (C7 / C9) * C6 * 1000 * 2
     if cortes > 0:
         coste_materia_prima = coste_m2 * (ancho_material / cortes) * ancho_cliente * 1000 * 2
     else:
@@ -37,7 +34,6 @@ if tipo_producto == "Bolsas estándar-coextruido":
     st.markdown("---")
     st.header("2. Variables Comerciales")
     
-    # C14, C15, C16, C17
     material_opcion = st.selectbox("Material laminado o impreso", ["Liso", "Impreso"])
     tipo_fabricante = st.selectbox("Tipo de fabricante", ["Transformador", "Multinacional", "Distribuidor"])
     zona_cliente = st.selectbox("Zona del cliente", ["Sur", "Norte"])
@@ -46,7 +42,6 @@ if tipo_producto == "Bolsas estándar-coextruido":
         ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"]
     )
 
-    # Búsquedas en tablas (equivalente a BUSCARX del Excel)
     if material_opcion == "Liso":
         val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[tipo_fabricante]
         val_zona = {"Norte": 0.64, "Sur": 0.50}[zona_cliente]
@@ -66,18 +61,14 @@ if tipo_producto == "Bolsas estándar-coextruido":
             "mas de 30000": 0.65
         }[cantidad_bolsas]
 
-    # C20: Markup calculado
     markup_calculado = val_fab + val_zona + val_cant
 
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
-    # Texto informativo con los mínimos del Excel
     st.caption("Liso: mínimo 1,42 — Impreso: mínimo 2")
-    
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-    # C21: Markup propuesto
     usar_manual = st.checkbox("Modificar Markup")
     
     if usar_manual:
@@ -88,17 +79,32 @@ if tipo_producto == "Bolsas estándar-coextruido":
             step=0.001,
             format="%.3f"
         )
-        # Fórmula Excel C23: =C21 * C11
         precio_1000_bolsas = markup_propuesto * coste_materia_prima
     else:
-        # Fórmula Excel C23: =C20 * C11
         precio_1000_bolsas = markup_calculado * coste_materia_prima
 
-    # C24: Precio de venta sugerido ml = C23 / 1000
     precio_ml = precio_1000_bolsas / 1000
 
     st.metric(label="Precio de venta sugerido 1000 bolsas", value=f"{precio_1000_bolsas:.3f} €")
     st.metric(label="Precio de venta sugerido ml", value=f"{precio_ml:.3f} €")
+
+elif tipo_producto == "Retráctil":
+    st.header("1. Datos del Material - Retráctil")
+    
+    coste_ml = st.number_input("Coste €/ml", min_value=0.0, value=0.284, step=0.001, format="%.3f")
+    espesor = st.number_input("Espesor", min_value=0.0, value=45.0, step=1.0, format="%.1f")
+    ancho = st.number_input("Ancho en m", min_value=0.0, value=0.200, step=0.001, format="%.3f")
+    largo = st.number_input("Largo en m", min_value=0.0, value=0.400, step=0.001, format="%.3f")
+    
+    # Coste materia prima = C5 * C8 * 1000
+    coste_materia_prima = coste_ml * largo * 1000
+
+    st.markdown("---")
+    st.metric(label="Coste materia prima", value=f"{coste_materia_prima:.3f} €")
+
+    st.markdown("---")
+    st.header("2. Variables Comerciales y Precios")
+    st.info("Configuración de variables comerciales para Retráctil en proceso de integración.")
 
 else:
     st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
