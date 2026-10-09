@@ -15,11 +15,11 @@ st.divider()
 if tipo_producto == "Bolsas estándar-coextruido":
     st.header("1. Datos del Material - Bolsas estándar")
     
-    # C5, C6, C7, C8
+    # C5, C6, C7, C8 (con el texto solicitado en el largo)
     coste_m2 = st.number_input("Coste €/m2", min_value=0.0, value=0.273, step=0.001, format="%.3f")
     ancho_cliente = st.number_input("Ancho cliente en m", min_value=0.0, value=0.150, step=0.001, format="%.3f")
     ancho_material = st.number_input("Ancho material en m", min_value=0.0, value=1.200, step=0.001, format="%.3f")
-    largo = st.number_input("Largo en m", min_value=0.0, value=0.300, step=0.001, format="%.3f")
+    largo = st.number_input("Largo en m (Si es lámina = 1)", min_value=0.0, value=0.300, step=0.001, format="%.3f")
     
     # C9: Cortes = ENTERO(C7 / C8)
     cortes = int(ancho_material // largo) if largo > 0 else 0
@@ -72,10 +72,13 @@ if tipo_producto == "Bolsas estándar-coextruido":
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
+    # Texto informativo con los mínimos del Excel
+    st.caption("Liso: mínimo 1,42 — Impreso: mínimo 2")
+    
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-    # C21: Markup propuesto (campo numérico directo, si se deja en 0 o vacío actúa como celda vacía)
-    usar_manual = st.checkbox("Modificar Markup")
+    # C21: Markup propuesto
+    usar_manual = st.checkbox("Modificar C21 (Markup propuesto)")
     
     if usar_manual:
         markup_propuesto = st.number_input(
