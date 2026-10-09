@@ -398,13 +398,11 @@ elif tipo_producto == "Laminado no estándar":
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
-    if lam_material_opcion == "Liso":
-        if tipo_lam_bolsa == "Lamina":
-            st.caption("Lámina / Liso: mínimo 1,5")
-        else:
-            st.caption("Bolsa / Liso: mínimo 1,42")
+    if tipo_lam_bolsa == "Lamina":
+            st.caption("Liso: mínimo 1,5 - Impreso: mínimo 2")
+      
     else:
-        st.caption("Impreso: mínimo 2")
+        st.caption("Liso: mínimo 1,42 - Impreso: mínimo 2")
 
     st.metric(label="Markup", value=f"{markup_calculado_lam:.3f}")
 
