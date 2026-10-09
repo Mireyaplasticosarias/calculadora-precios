@@ -295,7 +295,7 @@ elif tipo_producto == "Laminado no estándar":
         st.text(f"Densidad: {dens4}")
 
     st.markdown("---")
-    ancho_cliente = st.number_input("Ancho cliente en m.", min_value=0.0, value=0.720, step=0.001, format="%.3f", key="lam_ac")
+    ancho_cliente = st.number_input("Ancho cliente en m.", min_value=0.0, value=0.715, step=0.001, format="%.3f", key="lam_ac")
     ancho_bobina = st.number_input("Ancho de la bobina en m.", min_value=0.0, value=0.840, step=0.001, format="%.3f", key="lam_ab")
     largo_bolsa = st.number_input("Largo en m. BOLSA", min_value=0.0, value=0.400, step=0.001, format="%.3f", key="lam_lb")
     largo_lamina = st.number_input("Largo LAMINA", min_value=0.0, value=1.000, step=0.001, format="%.3f", key="lam_ll")
@@ -335,7 +335,6 @@ elif tipo_producto == "Laminado no estándar":
         
         coste_kg_final = coste_kg
         
-        # Corrección exacta para Coste materia prima €/m en modo Bolsa (relacionando el kg con el coste ponderado de forma idéntica al Excel)
         if tipo_lam_bolsa == "Bolsa":
             coste_materia_prima_m = kg_materia_prima * (ancho_cliente / largo_bolsa) * coste_kg
         else:
@@ -350,6 +349,75 @@ elif tipo_producto == "Laminado no estándar":
     st.metric(label="Kg materia prima", value=f"{kg_materia_prima:.4f} Kg")
     st.metric(label="Coste €/kg", value=f"{coste_kg_final:.3f} €")
     st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.3f} €")
+
+    # --- 2. VARIABLES COMERCIALES ---
+    st.markdown("---")
+    st.header("2. Variables Comerciales")
+    
+    lam_material_opcion = st.selectbox("Material laminado o impreso", ["Liso", "Impreso"], key="lam_mat_op")
+    lam_tipo_fabricante = st.selectbox("Tipo de fabricante", ["Multinacional", "Transformador", "Distribuidor"], key="lam_tipo_fab")
+    lam_zona_cliente = st.selectbox("Zona del cliente", ["Norte", "Sur"], key="lam_zona_cli")
+    lam_cantidad = st.selectbox("Cantidad", ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"], key="lam_cant")
+
+    # Tablas exactas de Lookup del Excel para Laminado no estándar
+    if tipo_lam_bolsa == "Lamina":
+        if lam_material_opcion == "Liso":
+            val_fab = {"Multinacional": 0.60, "Transformador": 0.59, "Distribuidor": 0.53}[lam_tipo_fabricante]
+            val_zona = {"Norte": 0.63, "Sur": 0.53}[lam_zona_cliente]
+            val_cant = {"menos de 10000": 0.56, "10000 - 20000": 0.52, "20000 - 30000": 0.48, "mas de 30000": 0.44}[lam_cantidad]
+        else: # Impreso
+            val_fab = {"Multinacional": 0.89, "Transformador": 0.79, "Distribuidor": 0.70}[lam_tipo_fabricante]
+            val_zona = {"Norte": 0.79, "Sur": 0.65}[lam_zona_cliente]
+            val_cant = {"menos de 10000": 0.82, "10000 - 20000": 0.75, "20000 - 30000": 0.70, "mas de 30000": 0.65}[lam_cantidad]
+    else: # Bolsa
+        if lam_material_opcion == "Liso":
+            val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[lam_tipo_fabricante]
+            val_zona = {"Norte": 0.64, "Sur": 0.50}[lam_zona_cliente]
+            val_cant = {"menos de 10000": 0.57, "10000 - 20000": 0.52, "20000 - 30000": 0.47, "mas de 30000": 0.42}[lam_cantidad]
+        else: # Impreso
+            val_fab = {"Multinacional": 0.89, "Transformador": 0.79, "Distribuidor": 0.70}[lam_tipo_fabricante]
+            val_zona = {"Norte": 0.79, "Sur": 0.65}[lam_zona_cliente]
+            val_cant = {"menos de 10000": 0.82, "10000 - 20000": 0.75, "20000 - 30000": 0.70, "mas de 30000": 0.65}[lam_cantidad]
+
+    markup_calculado_lam = val_fab + val_zona + val_cant
+
+    # --- 3. MARKUP Y PRECIO DE VENTA ---
+    st.markdown("---")
+    st.header("3. Markup y Precio de Venta")
+    
+    if lam_material_opcion == "Liso":
+        if tipo_lam_bolsa == "Lamina":
+            st.caption("Lámina / Liso: mínimo 1,5")
+        else:
+            st.caption("Bolsa / Liso: mínimo 1,42")
+    else:
+        st.caption("Impreso: mínimo 2")
+
+    st.metric(label="Markup", value=f"{markup_calculado_lam:.3f}")
+
+    usar_manual_lam = st.checkbox("Modificar Markup propuesto", key="lam_mod")
+    
+    if usar_manual_lam:
+        markup_propuesto_lam = st.number_input(
+            "Markup propuesto",
+            min_value=0.0,
+            value=markup_calculado_lam,
+            step=0.001,
+            format="%.3f",
+            key="lam_mprop"
+        )
+        markup_final = markup_propuesto_lam
+    else:
+        markup_final = markup_calculado_lam
+
+    # Fórmulas de precio sugerido según Excel:
+    # Precio de venta sugerido €/m =SI(C30=""; C20*C29; C20*C30)
+    # Precio de venta sugerido €/kg =SI(C30=""; C18*C29; C18*C30)
+    precio_sugerido_m = coste_materia_prima_m * markup_final
+    precio_sugerido_kg = coste_kg_final * markup_final
+
+    st.metric(label="Precio de venta sugerido €/m", value=f"{precio_sugerido_m:.3f} €")
+    st.metric(label="Precio de venta sugerido €/kg", value=f"{precio_sugerido_kg:.3f} €")
 
 else:
     st.info(f"Configuración para '{tipo_producto}' en desarrollo.")
