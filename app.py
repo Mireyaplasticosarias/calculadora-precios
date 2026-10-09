@@ -282,16 +282,30 @@ elif tipo_producto == "Laminado no estándar":
         
     with col3:
         mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=5, key="m3")
-        micras3 = st.number_input("Micras", min_value=0.0, value=25.0, step=1.0, format="%.1f", key="mic3")
-        coste3 = st.number_input("Coste €/kg", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos3")
-        dens3 = densidades_dict.get(mat3, 0) if mat3 != "(Ninguno)" else 0
+        if mat3 == "(Ninguno)":
+            micras3 = 0.0
+            coste3 = 0.0
+            dens3 = 0
+            st.number_input("Micras", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic3", disabled=True)
+            st.number_input("Coste €/kg", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos3", disabled=True)
+        else:
+            micras3 = st.number_input("Micras", min_value=0.0, value=25.0, step=1.0, format="%.1f", key="mic3")
+            coste3 = st.number_input("Coste €/kg", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos3")
+            dens3 = densidades_dict.get(mat3, 0)
         st.text(f"Densidad: {dens3}")
         
     with col4:
         mat4 = st.selectbox("Material 4", ["(Ninguno)"] + materiales_disponibles, index=0, key="m4")
-        micras4 = st.number_input("Micras", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
-        coste4 = st.number_input("Coste €/kg", min_value=0.0, value=0.000, step=0.001, format="%.3f", key="cos4")
-        dens4 = densidades_dict.get(mat4, 0) if mat4 != "(Ninguno)" else 0
+        if mat4 == "(Ninguno)":
+            micras4 = 0.0
+            coste4 = 0.0
+            dens4 = 0
+            st.number_input("Micras", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4", disabled=True)
+            st.number_input("Coste €/kg", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos4", disabled=True)
+        else:
+            micras4 = st.number_input("Micras", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
+            coste4 = st.number_input("Coste €/kg", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos4")
+            dens4 = densidades_dict.get(mat4, 0)
         st.text(f"Densidad: {dens4}")
 
     st.markdown("---")
@@ -315,9 +329,9 @@ elif tipo_producto == "Laminado no estándar":
         capas_datos.append((micras1, coste1, dens1))
     if mat2 != "(Ninguno)" and micras2 > 0:
         capas_datos.append((micras2, coste2, dens2))
-    if mat3 != "(Ninguno)" and mat3 != "" and micras3 > 0:
+    if mat3 != "(Ninguno)" and micras3 > 0:
         capas_datos.append((micras3, coste3, dens3))
-    if mat4 != "(Ninguno)" and mat4 != "" and micras4 > 0:
+    if mat4 != "(Ninguno)" and micras4 > 0:
         capas_datos.append((micras4, coste4, dens4))
 
     if len(capas_datos) > 0 and cortes > 0:
@@ -359,22 +373,21 @@ elif tipo_producto == "Laminado no estándar":
     lam_zona_cliente = st.selectbox("Zona del cliente", ["Norte", "Sur"], key="lam_zona_cli")
     lam_cantidad = st.selectbox("Cantidad", ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"], key="lam_cant")
 
-    # Tablas exactas de Lookup del Excel para Laminado no estándar
     if tipo_lam_bolsa == "Lamina":
         if lam_material_opcion == "Liso":
             val_fab = {"Multinacional": 0.60, "Transformador": 0.59, "Distribuidor": 0.53}[lam_tipo_fabricante]
             val_zona = {"Norte": 0.63, "Sur": 0.53}[lam_zona_cliente]
             val_cant = {"menos de 10000": 0.56, "10000 - 20000": 0.52, "20000 - 30000": 0.48, "mas de 30000": 0.44}[lam_cantidad]
-        else: # Impreso
+        else:
             val_fab = {"Multinacional": 0.89, "Transformador": 0.79, "Distribuidor": 0.70}[lam_tipo_fabricante]
             val_zona = {"Norte": 0.79, "Sur": 0.65}[lam_zona_cliente]
             val_cant = {"menos de 10000": 0.82, "10000 - 20000": 0.75, "20000 - 30000": 0.70, "mas de 30000": 0.65}[lam_cantidad]
-    else: # Bolsa
+    else:
         if lam_material_opcion == "Liso":
             val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[lam_tipo_fabricante]
             val_zona = {"Norte": 0.64, "Sur": 0.50}[lam_zona_cliente]
             val_cant = {"menos de 10000": 0.57, "10000 - 20000": 0.52, "20000 - 30000": 0.47, "mas de 30000": 0.42}[lam_cantidad]
-        else: # Impreso
+        else:
             val_fab = {"Multinacional": 0.89, "Transformador": 0.79, "Distribuidor": 0.70}[lam_tipo_fabricante]
             val_zona = {"Norte": 0.79, "Sur": 0.65}[lam_zona_cliente]
             val_cant = {"menos de 10000": 0.82, "10000 - 20000": 0.75, "20000 - 30000": 0.70, "mas de 30000": 0.65}[lam_cantidad]
@@ -410,9 +423,6 @@ elif tipo_producto == "Laminado no estándar":
     else:
         markup_final = markup_calculado_lam
 
-    # Fórmulas de precio sugerido según Excel:
-    # Precio de venta sugerido €/m =SI(C30=""; C20*C29; C20*C30)
-    # Precio de venta sugerido €/kg =SI(C30=""; C18*C29; C18*C30)
     precio_sugerido_m = coste_materia_prima_m * markup_final
     precio_sugerido_kg = coste_kg_final * markup_final
 
