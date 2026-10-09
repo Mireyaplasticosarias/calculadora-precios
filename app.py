@@ -281,7 +281,7 @@ elif tipo_producto == "Laminado no estándar":
         st.text(f"Densidad: {dens2}")
         
     with col3:
-        mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=5, key="m3") # PE-EVOH default
+        mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=5, key="m3")
         micras3 = st.number_input("Micras 3", min_value=0.0, value=25.0, step=1.0, format="%.1f", key="mic3")
         coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos3")
         dens3 = densidades_dict.get(mat3, 0) if mat3 != "(Ninguno)" else 0
@@ -326,7 +326,7 @@ elif tipo_producto == "Laminado no estándar":
         densidad_ponderada = suma_producto_densidad / suma_micras if suma_micras > 0 else 0
         coste_kg = suma_producto_coste / suma_micras if suma_micras > 0 else 0
         
-        # Factores exactos según las fórmulas de Excel provistas
+        # Factores exactos de tus fórmulas de Excel
         factor_largo_kg = largo_bolsa if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_largo_costem = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_cantidad = 2000 if tipo_lam_bolsa == "Bolsa" else 1
@@ -334,16 +334,19 @@ elif tipo_producto == "Laminado no estándar":
         # Kg materia prima
         kg_materia_prima = (ancho_bobina / cortes) * factor_largo_kg * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada
         
-        # Coste materia prima €/m (usando C11 para Bolsa y C15 para Lámina según tu fórmula exacta)
+        # Coste €/kg
+        coste_kg_final = coste_kg
+        
+        # Coste materia prima €/m (usando C11 para Bolsa y C15 para Lámina)
         coste_materia_prima_m = (ancho_bobina / cortes) * factor_largo_costem * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada * coste_kg
     else:
         kg_materia_prima = 0.0
-        coste_kg = 0.0
+        coste_kg_final = 0.0
         coste_materia_prima_m = 0.0
 
     st.markdown("---")
     st.metric(label="Kg materia prima", value=f"{kg_materia_prima:.4f} Kg")
-    st.metric(label="Coste €/kg", value=f"{coste_kg:.3f} €")
+    st.metric(label="Coste €/kg", value=f"{coste_kg_final:.3f} €")
     st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.3f} €")
 
 else:
