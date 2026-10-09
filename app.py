@@ -257,7 +257,6 @@ elif tipo_producto == "Laminado no estándar":
     
     tipo_lam_bolsa = st.selectbox("Lamina o bolsa", ["Lamina", "Bolsa"], key="lam_tipo")
     
-    # 4 capas de materiales
     materiales_disponibles = ["PET", "Al", "PE", "PP", "PA", "PE-EVOH", "PP-EVOH", "PET saran"]
     densidades_dict = {
         "PET": 1400, "Al": 2300, "PE": 950, "PP": 950, 
@@ -270,21 +269,21 @@ elif tipo_producto == "Laminado no estándar":
     with col1:
         mat1 = st.selectbox("Material 1", materiales_disponibles, index=4, key="m1")
         micras1 = st.number_input("Micras 1", min_value=0.0, value=20.0, step=1.0, format="%.1f", key="mic1")
-        coste1 = st.number_input("Coste €/kg 1", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos1")
+        coste1 = st.number_input("Coste €/kg 1", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos1")
         dens1 = densidades_dict.get(mat1, 0)
         st.text(f"Densidad: {dens1}")
         
     with col2:
         mat2 = st.selectbox("Material 2", materiales_disponibles, index=2, key="m2")
         micras2 = st.number_input("Micras 2", min_value=0.0, value=30.0, step=1.0, format="%.1f", key="mic2")
-        coste2 = st.number_input("Coste €/kg 2", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos2")
+        coste2 = st.number_input("Coste €/kg 2", min_value=0.0, value=2.700, step=0.001, format="%.3f", key="cos2")
         dens2 = densidades_dict.get(mat2, 0)
         st.text(f"Densidad: {dens2}")
         
     with col3:
-        mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=0, key="m3")
-        micras3 = st.number_input("Micras 3", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic3")
-        coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos3")
+        mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=5, key="m3") # PE-EVOH default
+        micras3 = st.number_input("Micras 3", min_value=0.0, value=25.0, step=1.0, format="%.1f", key="mic3")
+        coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos3")
         dens3 = densidades_dict.get(mat3, 0) if mat3 != "(Ninguno)" else 0
         st.text(f"Densidad: {dens3}")
         
@@ -327,7 +326,7 @@ elif tipo_producto == "Laminado no estándar":
         densidad_ponderada = suma_producto_densidad / suma_micras if suma_micras > 0 else 0
         coste_kg = suma_producto_coste / suma_micras if suma_micras > 0 else 0
         
-        # Factores según la fórmula exacta proporcionada
+        # Factores exactos según las fórmulas de Excel provistas
         factor_largo_kg = largo_bolsa if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_largo_costem = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_cantidad = 2000 if tipo_lam_bolsa == "Bolsa" else 1
@@ -335,7 +334,7 @@ elif tipo_producto == "Laminado no estándar":
         # Kg materia prima
         kg_materia_prima = (ancho_bobina / cortes) * factor_largo_kg * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada
         
-        # Coste materia prima €/m con C11 para Bolsa y C15 para Lámina
+        # Coste materia prima €/m (usando C11 para Bolsa y C15 para Lámina según tu fórmula exacta)
         coste_materia_prima_m = (ancho_bobina / cortes) * factor_largo_costem * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada * coste_kg
     else:
         kg_materia_prima = 0.0
