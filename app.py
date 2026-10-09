@@ -1,6 +1,7 @@
 import streamlit as st
 
 st.set_page_config(page_title="Calculadora de Precios - Plásticos Arias", layout="centered")
+st.image("Flexible packagiing.png", width=180)
 
 st.title("Calculadora de Precios - Plásticos Arias")
 
