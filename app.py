@@ -4,6 +4,7 @@ st.set_page_config(page_title="Calculadora de Precios - Plásticos Arias", layou
 
 st.title("Calculadora de Precios - Plásticos Arias")
 
+# Selección del Producto
 tipo_producto = st.selectbox(
     "Selecciona el Tipo de Producto:",
     ["Bolsas estándar-coextruido", "Retráctil", "Termoformado", "Laminado no estándar"]
@@ -90,19 +91,72 @@ if tipo_producto == "Bolsas estándar-coextruido":
 elif tipo_producto == "Retráctil":
     st.header("1. Datos del Material - Retráctil")
     
-    coste_ml = st.number_input("Coste €/ml", min_value=0.0, value=0.284, step=0.001, format="%.3f")
+    coste_ml = st.number_input("Coste €/ml", min_value=0.0, value=0.500, step=0.001, format="%.3f")
     espesor = st.number_input("Espesor", min_value=0.0, value=45.0, step=1.0, format="%.1f")
     ancho = st.number_input("Ancho en m", min_value=0.0, value=0.200, step=0.001, format="%.3f")
     largo = st.number_input("Largo en m", min_value=0.0, value=0.400, step=0.001, format="%.3f")
     
+    # Coste materia prima = C5 * C8 * 1000
     coste_materia_prima = coste_ml * largo * 1000
 
     st.markdown("---")
     st.metric(label="Coste materia prima", value=f"{coste_materia_prima:.3f} €")
 
     st.markdown("---")
-    st.header("2. Variables Comerciales y Precios")
-    st.info("Configuración de variables comerciales para Retráctil en desarrollo.")
+    st.header("2. Variables Comerciales")
+    
+    material_opcion = st.selectbox("Material laminado o impreso", ["Liso", "Impreso"], key="ret_mat")
+    tipo_fabricante = st.selectbox("Tipo de fabricante", ["Transformador", "Multinacional", "Distribuidor"], key="ret_fab")
+    zona_cliente = st.selectbox("Zona del cliente", ["Sur", "Norte"], key="ret_zona")
+    cantidad_bolsas = st.selectbox(
+        "Cantidad", 
+        ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"],
+        key="ret_cant"
+    )
+
+    if material_opcion == "Liso":
+        val_fab = {"Multinacional": 0.69, "Transformador": 0.59, "Distribuidor": 0.50}[tipo_fabricante]
+        val_zona = {"Norte": 0.64, "Sur": 0.50}[zona_cliente]
+        val_cant = {
+            "menos de 10000": 0.57, 
+            "10000 - 20000": 0.52, 
+            "20000 - 30000": 0.47, 
+            "mas de 30000": 0.42
+        }[cantidad_bolsas]
+    else:
+        val_fab = {"Multinacional": 0.89, "Transformador": 0.79, "Distribuidor": 0.70}[tipo_fabricante]
+        val_zona = {"Norte": 0.79, "Sur": 0.65}[zona_cliente]
+        val_cant = {
+            "menos de 10000": 0.82, 
+            "10000 - 20000": 0.75, 
+            "20000 - 30000": 0.70, 
+            "mas de 30000": 0.65
+        }[cantidad_bolsas]
+
+    markup_calculado = val_fab + val_zona + val_cant
+
+    st.markdown("---")
+    st.header("3. Markup y Precio de Venta")
+    
+    st.caption("Liso: mínimo 1,42")
+    st.metric(label="Markup", value=f"{markup_calculado:.3f}")
+
+    usar_manual = st.checkbox("Modificar Markup propuesto", key="ret_mod")
+    
+    if usar_manual:
+        markup_propuesto = st.number_input(
+            "Markup propuesto",
+            min_value=0.0,
+            value=1.400,
+            step=0.001,
+            format="%.3f",
+            key="ret_mprop"
+        )
+        precio_venta_sugerido = markup_propuesto * coste_materia_prima
+    else:
+        precio_venta_sugerido = markup_calculado * coste_materia_prima
+
+    st.metric(label="Precio de venta sugerido", value=f"{precio_venta_sugerido:.3f} €")
 
 else:
-    st.info(f"Configuración para '{tipo_producto}' en desarrollo.")
+    st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
