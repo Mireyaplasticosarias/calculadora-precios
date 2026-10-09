@@ -73,7 +73,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
     
     if usar_manual:
         markup_propuesto = st.number_input(
-            "Markup propuesto (C21)",
+            "Markup propuesto",
             min_value=0.0,
             value=1.400,
             step=0.001,
@@ -229,7 +229,7 @@ elif tipo_producto == "Termoformado":
         
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-    usar_manual = st.checkbox("Modificar Markup propuesto", key="termo_mod")
+    usar_manual = st.checkbox("Modificar Markup", key="termo_mod")
     
     if usar_manual:
         markup_propuesto = st.number_input(
