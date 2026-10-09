@@ -406,7 +406,7 @@ elif tipo_producto == "Laminado no estándar":
 
     st.metric(label="Markup", value=f"{markup_calculado_lam:.3f}")
 
-    usar_manual_lam = st.checkbox("Modificar Markup propuesto", key="lam_mod")
+    usar_manual_lam = st.checkbox("Modificar Markup", key="lam_mod")
     
     if usar_manual_lam:
         markup_propuesto_lam = st.number_input(
