@@ -263,34 +263,34 @@ elif tipo_producto == "Laminado no estándar":
         "PA": 1200, "PE-EVOH": 950, "PP-EVOH": 950, "PET saran": 1400
     }
     
-    st.subheader("Configuración de Capas (hasta 4)")
+    st.subheader("Configuración de Capas")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         mat1 = st.selectbox("Material 1", materiales_disponibles, index=4, key="m1")
-        micras1 = st.number_input("Micras 1", min_value=0.0, value=20.0, step=1.0, format="%.1f", key="mic1")
-        coste1 = st.number_input("Coste €/kg 1", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos1")
+        micras1 = st.number_input("Micras", min_value=0.0, value=20.0, step=1.0, format="%.1f", key="mic1")
+        coste1 = st.number_input("Coste €/kg", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos1")
         dens1 = densidades_dict.get(mat1, 0)
         st.text(f"Densidad: {dens1}")
         
     with col2:
         mat2 = st.selectbox("Material 2", materiales_disponibles, index=2, key="m2")
-        micras2 = st.number_input("Micras 2", min_value=0.0, value=30.0, step=1.0, format="%.1f", key="mic2")
-        coste2 = st.number_input("Coste €/kg 2", min_value=0.0, value=2.700, step=0.001, format="%.3f", key="cos2")
+        micras2 = st.number_input("Micras", min_value=0.0, value=30.0, step=1.0, format="%.1f", key="mic2")
+        coste2 = st.number_input("Coste €/kg", min_value=0.0, value=2.700, step=0.001, format="%.3f", key="cos2")
         dens2 = densidades_dict.get(mat2, 0)
         st.text(f"Densidad: {dens2}")
         
     with col3:
         mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=5, key="m3")
-        micras3 = st.number_input("Micras 3", min_value=0.0, value=25.0, step=1.0, format="%.1f", key="mic3")
-        coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos3")
+        micras3 = st.number_input("Micras", min_value=0.0, value=25.0, step=1.0, format="%.1f", key="mic3")
+        coste3 = st.number_input("Coste €/kg", min_value=0.0, value=3.000, step=0.001, format="%.3f", key="cos3")
         dens3 = densidades_dict.get(mat3, 0) if mat3 != "(Ninguno)" else 0
         st.text(f"Densidad: {dens3}")
         
     with col4:
         mat4 = st.selectbox("Material 4", ["(Ninguno)"] + materiales_disponibles, index=0, key="m4")
-        micras4 = st.number_input("Micras 4", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
-        coste4 = st.number_input("Coste €/kg 4", min_value=0.0, value=0.000, step=0.001, format="%.3f", key="cos4")
+        micras4 = st.number_input("Micras", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
+        coste4 = st.number_input("Coste €/kg", min_value=0.0, value=0.000, step=0.001, format="%.3f", key="cos4")
         dens4 = densidades_dict.get(mat4, 0) if mat4 != "(Ninguno)" else 0
         st.text(f"Densidad: {dens4}")
 
