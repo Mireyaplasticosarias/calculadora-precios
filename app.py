@@ -328,17 +328,13 @@ elif tipo_producto == "Laminado no estándar":
         densidad_ponderada = suma_producto_densidad / suma_micras if suma_micras > 0 else 0
         coste_kg = suma_producto_coste / suma_micras if suma_micras > 0 else 0
         
-        # Factores idénticos a los de Excel:
-        # Kg materia prima: =(C12/C14)*(IF(C5="Bolsa",C13,C15))*(IF(C5="Lamina",1, IF(C5="Bolsa", 2000, "")))*((SUM(C7:F7)*4)/4*10^-6)*1.03*((SUMPRODUCT(C7:F7,C9:F9)/(SUM(C7:F7))))
         factor_largo_kg = largo_bolsa if tipo_lam_bolsa == "Bolsa" else largo_lamina
         factor_cantidad = 2000 if tipo_lam_bolsa == "Bolsa" else 1
         
         kg_materia_prima = (ancho_bobina / cortes) * factor_largo_kg * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada
         
-        # Coste €/kg: =((SUMPRODUCT(C7:F7,C8:F8)/(SUM(C7:F7))))
         coste_kg_final = coste_kg
         
-        # Coste materia prima €/m: =(C12/C14)*(IF(C5="Bolsa",C11,C15))*(IF(C5="Lamina",1, IF(C5="Bolsa", 2000, "")))*((SUM(C7:F7)*4)/4*10^-6)*1.03*((SUMPRODUCT(C7:F7,C9:F9)/(SUM(C7:F7))))*((SUMPRODUCT(C7:F7,C8:F8)/(SUM(C7:F7))))
         factor_largo_costem = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
         coste_materia_prima_m = (ancho_bobina / cortes) * factor_largo_costem * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada * coste_kg
     else:
@@ -347,9 +343,9 @@ elif tipo_producto == "Laminado no estándar":
         coste_materia_prima_m = 0.0
 
     st.markdown("---")
-    st.metric(label="Kg materia prima", value=f"{kg_materia_prima:.6f} Kg")
+    st.metric(label="Kg materia prima", value=f"{kg_materia_prima:.4f} Kg")
     st.metric(label="Coste €/kg", value=f"{coste_kg_final:.3f} €")
-    st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.7f} €")
+    st.metric(label="Coste materia prima €/m", value=f"{coste_materia_prima_m:.3f} €")
 
 else:
     st.info(f"Configuración para '{tipo_producto}' en desarrollo.")
