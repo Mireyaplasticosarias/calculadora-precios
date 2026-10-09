@@ -38,7 +38,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
     tipo_fabricante = st.selectbox("Tipo de fabricante", ["Transformador", "Multinacional", "Distribuidor"])
     zona_cliente = st.selectbox("Zona del cliente", ["Sur", "Norte"])
     cantidad_bolsas = st.selectbox(
-        "Cantidad bolsas", 
+        "Cantidad", 
         ["menos de 10000", "10000 - 20000", "20000 - 30000", "mas de 30000"]
     )
 
@@ -66,7 +66,7 @@ if tipo_producto == "Bolsas estándar-coextruido":
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
-    st.caption("Liso: mínimo 1,42 — Impreso: mínimo 2")
+    st.caption("Liso: mínimo 1,42 - Impreso: mínimo 2")
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
     usar_manual = st.checkbox("Modificar Markup")
@@ -138,7 +138,7 @@ elif tipo_producto == "Retráctil":
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
-    st.caption("Liso: mínimo 1,42")
+    st.caption("Liso: mínimo 1,42 - Impreso: mínimo 2")
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
     usar_manual = st.checkbox("Modificar Markup propuesto (C20)", key="ret_mod")
