@@ -1,139 +1,88 @@
 import streamlit as st
 
-# Configuración de la página
-st.set_page_config(
-    page_title="Herramienta de Precios",
-    page_icon="🧮",
-    layout="wide"
+st.set_page_config(page_title="Calculadora de Precios - Plásticos Arias", layout="centered")
+
+st.title("Calculadora de Precios - Plásticos Arias")
+
+# Selección del Producto
+tipo_producto = st.selectbox(
+    "Selecciona el Tipo de Producto:",
+    ["Bolsas estándar-coextruido", "Retráctil", "Termoformado", "Laminado no estándar"]
 )
 
-# Estilo visual general
-st.markdown("""
-    <style>
-    .main-title {
-        font-size: 2.2rem;
-        color: #1f77b4;
-        font-weight: 700;
-        margin-bottom: 0px;
-    }
-    .subtitle {
-        font-size: 1.1rem;
-        color: #555555;
-        margin-bottom: 20px;
-    }
-    .rule-box {
-        background-color: #f0f2f6;
-        padding: 10px 15px;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        color: #31333F;
-        margin-bottom: 20px;
-        border-left: 5px solid #1f77b4;
-    }
-    </style>
-""", unsafe_allow_html=True)
+st.divider()
 
-# Inicializar el estado de la sesión para la navegación
-if "opcion_seleccionada" not in st.session_state:
-    st.session_state.opcion_seleccionada = None
-
-def volver_inicio():
-    st.session_state.opcion_seleccionada = None
-
-# --- PANTALLA DE INICIO (MENÚ PRINCIPAL) ---
-if st.session_state.opcion_seleccionada is None:
-    st.markdown('<p class="main-title">🧮 Herramienta de Cálculo de Precios</p>', unsafe_allow_html=True)
-    st.markdown('<p class="subtitle">Selecciona el tipo de producto para comenzar el cálculo:</p>', unsafe_allow_html=True)
+if tipo_producto == "Bolsas estándar-coextruido":
+    st.header("1. Parámetros y Costes - Bolsas estándar-coextruido")
     
-    col1, col2 = st.columns(2)
+    tipo_impresion = st.radio("Tipo de acabado:", ["Liso", "Impreso"], horizontal=True)
     
-    with col1:
-        if st.button("📦 Bolsas estándar-coextruido", use_container_width=True, type="primary"):
-            st.session_state.opcion_seleccionada = "Bolsas estándar-coextruido"
-            st.rerun()
-            
-        if st.button("🌡️ Termoformado", use_container_width=True, type="primary"):
-            st.session_state.opcion_seleccionada = "Termoformado"
-            st.rerun()
-            
-    with col2:
-        if st.button("🔄 Retráctil", use_container_width=True, type="primary"):
-            st.session_state.opcion_seleccionada = "Retráctil"
-            st.rerun()
-            
-        if st.button("📜 Laminado no estándar", use_container_width=True, type="primary"):
-            st.session_state.opcion_seleccionada = "Laminado no estándar"
-            st.rerun()
+    # Inputs específicos del Excel para Coextruido
+    coste_m2 = st.number_input("Coste (€/m2)", min_value=0.0, value=0.50, step=0.01)
+    ancho_cliente = st.number_input("Ancho cliente en m", min_value=0.0, value=0.30, step=0.01)
+    ancho_material = st.number_input("Ancho material en m", min_value=0.0, value=1.20, step=0.01)
+    largo = st.number_input("Largo en m", min_value=0.0, value=0.50, step=0.01)
+    
+    # Cálculos automáticos
+    # Cálculo de cortes (evitando división por cero)
+    cortes = int(ancho_material // ancho_cliente) if ancho_cliente > 0 else 1
+    if cortes < 1:
+        cortes = 1
+        
+    # Coste de la materia prima (fórmula basada en dimensiones y cortes)
+    # Área por bolsa / pieza ajustada por cortes y coste m2
+    area_pieza = ancho_cliente * largo
+    coste_materia_prima = (area_pieza * coste_m2) / cortes if cortes > 0 else 0.0
+
+    st.markdown("---")
+    st.subheader("Resultados de Cálculos de Materia Prima")
+    st.metric(label="Número de Cortes", value=f"{cortes}")
+    st.metric(label="Coste de la Materia Prima (€)", value=f"{coste_materia_prima:.4f} €")
+
+    st.markdown("---")
+    st.subheader("2. Costes Variables y Opciones de Markup")
+    
+    # Opciones de costes variables / selector de condiciones en función del Excel
+    opcion_variable = st.selectbox(
+        "Selecciona condición de proceso / variables:",
+        ["Estándar", "Volumen alto / Optimizado", "Especial / Complejo"]
+    )
+    
+    # Asignación de markup automático según opción seleccionada y tipo de impresión
+    if tipo_impresion == "Liso":
+        markup_base = 1.45 if opcion_variable == "Estándar" else (1.40 if opcion_variable == "Volumen alto / Optimizado" else 1.55)
+    else:  # Impreso
+        markup_base = 1.65 if opcion_variable == "Estándar" else (1.55 if opcion_variable == "Volumen alto / Optimizado" else 1.75)
+
+    usar_markup_manual = st.checkbox("¿Modificar Markup manualmente?")
+    
+    if usar_markup_manual:
+        markup_final = st.number_input(
+            "Introduce Markup manual:",
+            min_value=1.0,
+            value=float(markup_base),
+            step=0.01,
+            help="El mínimo recomendado para este tipo es acorde a las reglas internas."
+        )
+        st.text(f"Markup sugerido por sistema: {markup_base:.2f}x")
+    else:
+        markup_final = markup_base
+        st.text(f"Markup aplicado automáticamente: {markup_final:.2f}x")
+
+    st.markdown("---")
+    st.subheader("3. Precios de Venta Sugeridos")
+    
+    # Fórmulas finales de venta
+    precio_venta_base = coste_materia_prima * markup_final
+    
+    # Supuestos de conversión a 1,000 bolsas y por metro lineal (ml)
+    # (Ajustar según la fórmula exacta de vuestro Excel si difiere el factor multiplicador)
+    precio_1000_bolsas = precio_venta_base * 1000
+    precio_ml = precio_venta_base / largo if largo > 0 else 0.0
+
+    st.metric(label="Precio de Venta Sugerido (1.000 bolsas)", value=f"{precio_1000_bolsas:,.2f} €")
+    st.metric(label="Precio de Venta Sugerido por metro lineal (ml)", value=f"{precio_ml:,.4f} €")
 
 else:
-    # --- PANTALLA DE CÁLCULO ---
-    opcion = st.session_state.opcion_seleccionada
-    
-    # Barra lateral con botón de inicio
-    with st.sidebar:
-        st.subheader("Navegación")
-        if st.button("⬅️ Volver al Inicio", use_container_width=True):
-            volver_inicio()
-            st.rerun()
-        st.divider()
-        st.info(f"Estás calculando:\n**{opcion}**")
-
-    st.markdown(f'<p class="main-title">Calculadora: {opcion}</p>', unsafe_allow_html=True)
-    st.markdown("---")
-
-    # Mostrar el texto de las reglas de markup exactas según la opción seleccionada
-    if opcion in ["Bolsas estándar-coextruido", "Retráctil"]:
-        st.markdown('<div class="rule-box"><b>Regla de Markup:</b> En Bolsas estándar-coextruido o Retráctil, el markup mínimo si se pone a mano es <b>1,42</b> si es liso y <b>2</b> si es impreso.</div>', unsafe_allow_html=True)
-        markup_liso = 1.42
-        markup_impreso = 2.0
-    elif opcion == "Termoformado":
-        st.markdown('<div class="rule-box"><b>Regla de Markup:</b> Si es Termoformado, el markup mínimo si se pone a mano es <b>1,22</b> si es liso y <b>2</b> si es impreso.</div>', unsafe_allow_html=True)
-        markup_liso = 1.22
-        markup_impreso = 2.0
-    elif opcion == "Laminado no estándar":
-        st.markdown('<div class="rule-box"><b>Regla de Markup:</b> Si es Laminado no estándar, el markup mínimo si se pone a mano es <b>1,5</b> si es liso y <b>2</b> si es impreso.</div>', unsafe_allow_html=True)
-        markup_liso = 1.5
-        markup_impreso = 2.0
-
-    # Layout de entradas de datos
-    col_inputs, col_resultados = st.columns([1.2, 1])
-
-    with col_inputs:
-        st.subheader("1. Inputs y Variables")
-        
-        tipo_impresion = st.radio("Tipo de acabado:", ["Liso", "Impreso"], horizontal=True)
-        
-        # Inputs genéricos adaptados a la simulación de costes
-        coste_materia_prima = st.number_input("Coste de Materia Prima / Fabricación (€)", min_value=0.0, value=50.0, step=1.0)
-        costes_adicionales = st.number_input("Costes Indirectos / Manipulación (€)", min_value=0.0, value=10.0, step=1.0)
-        
-        # Markup automático por defecto según selección
-        markup_sugerido_default = markup_liso if tipo_impresion == "Liso" else markup_impreso
-        
-        usar_markup_manual = st.checkbox("¿Modificar Markup manualmente?")
-        
-        if usar_markup_manual:
-            markup_manual = st.number_input(
-                "Introduce Markup manual:", 
-                min_value=1.0, 
-                value=float(markup_sugerido_default), 
-                step=0.01,
-                help=f"El mínimo recomendado para este tipo en modo {tipo_impresion} es {markup_sugerido_default}"
-            )
-            markup_final = markup_manual
-        else:
-            markup_final = markup_sugerido_default
-            st.text(f"Markup aplicado automáticamente: {markup_final}")
-
-    with col_resultados:
-        st.subheader("2. Resultados")
-        
-        # Cálculos de precio de fabricación y venta
-        precio_fabricacion = coste_materia_prima + costes_adicionales
-        precio_venta = precio_fabricacion * markup_final
-        beneficio = precio_venta - precio_fabricacion
-        
-        st.metric(label="Coste de Fabricación Total", value=f"{precio_fabricacion:.2f} €")
-        st.metric(label="Markup Aplicado", value=f"{markup_final:.2f}x")
-        st.metric(label="Precio de Venta Sugerido", value=f"{precio_venta:.2f} €")
-        st.metric(label="Margen de Beneficio Estimado", value=f"{beneficio:.2f} €")
+    # Espacio reservado para los otros 3 productos (Retráctil, Termoformado, Laminado)
+    st.info(f"Configuración para '{tipo_producto}' en desarrollo o pendiente de integrar los inputs específicos.")
