@@ -264,34 +264,34 @@ elif tipo_producto == "Laminado no estándar":
         "PA": 1200, "PE-EVOH": 950, "PP-EVOH": 950, "PET saran": 1400
     }
     
-    st.subheader("Configuración de Capas")
+    st.subheader("Configuración de Capas (hasta 4)")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         mat1 = st.selectbox("Material 1", materiales_disponibles, index=4, key="m1") # PA default
-        micras1 = st.number_input("Micras", min_value=0.0, value=20.0, step=1.0, format="%.1f", key="mic1")
-        coste1 = st.number_input("Coste €/kg", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos1")
+        micras1 = st.number_input("Micras 1", min_value=0.0, value=20.0, step=1.0, format="%.1f", key="mic1")
+        coste1 = st.number_input("Coste €/kg 1", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos1")
         dens1 = densidades_dict.get(mat1, 0)
         st.text(f"Densidad: {dens1}")
         
     with col2:
         mat2 = st.selectbox("Material 2", materiales_disponibles, index=2, key="m2") # PP default
-        micras2 = st.number_input("Micras", min_value=0.0, value=30.0, step=1.0, format="%.1f", key="mic2")
-        coste2 = st.number_input("Coste €/kg", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos2")
+        micras2 = st.number_input("Micras 2", min_value=0.0, value=30.0, step=1.0, format="%.1f", key="mic2")
+        coste2 = st.number_input("Coste €/kg 2", min_value=0.0, value=2.900, step=0.001, format="%.3f", key="cos2")
         dens2 = densidades_dict.get(mat2, 0)
         st.text(f"Densidad: {dens2}")
         
     with col3:
         mat3 = st.selectbox("Material 3", ["(Ninguno)"] + materiales_disponibles, index=0, key="m3")
-        micras3 = st.number_input("Micras", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic3")
-        coste3 = st.number_input("Coste €/kg", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos3")
+        micras3 = st.number_input("Micras 3", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic3")
+        coste3 = st.number_input("Coste €/kg 3", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos3")
         dens3 = densidades_dict.get(mat3, 0) if mat3 != "(Ninguno)" else 0
         st.text(f"Densidad: {dens3}")
         
     with col4:
         mat4 = st.selectbox("Material 4", ["(Ninguno)"] + materiales_disponibles, index=0, key="m4")
-        micras4 = st.number_input("Micras", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
-        coste4 = st.number_input("Coste €/kg", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos4")
+        micras4 = st.number_input("Micras 4", min_value=0.0, value=0.0, step=1.0, format="%.1f", key="mic4")
+        coste4 = st.number_input("Coste €/kg 4", min_value=0.0, value=0.0, step=0.001, format="%.3f", key="cos4")
         dens4 = densidades_dict.get(mat4, 0) if mat4 != "(Ninguno)" else 0
         st.text(f"Densidad: {dens4}")
 
@@ -328,14 +328,17 @@ elif tipo_producto == "Laminado no estándar":
         densidad_ponderada = suma_producto_densidad / suma_micras if suma_micras > 0 else 0
         coste_kg = suma_producto_coste / suma_micras if suma_micras > 0 else 0
         
-        mult_tipo = ancho_cliente if tipo_lam_bolsa == "Bolsa" else largo_lamina
-        factor_tipo = 2000 if tipo_lam_bolsa == "Bolsa" else 1
+        # Factores exactos de la fórmula de Excel:
+        # C13 (Largo bolsa) si es Bolsa, C15 (Largo lámina = 1) si es Lámina
+        factor_largo = largo_bolsa if tipo_lam_bolsa == "Bolsa" else largo_lamina
+        # 2000 si es Bolsa, 1 si es Lámina
+        factor_cantidad = 2000 if tipo_lam_bolsa == "Bolsa" else 1
         
-        # Kg materia prima formula:
+        # Kg materia prima formula exacta:
         # =(C12/C14)*(SI(C5="Bolsa";C13;C15))*(SI(C5="Lamina";1; SI(C5="Bolsa"; 2000; "")))*((SUMA(C7:F7)*4)/4*10^-6)*1,03*((SUMAPRODUCTO(C7:F7;C9:F9)/(SUMA(C7:F7))))
-        kg_materia_prima = (ancho_bobina / cortes) * mult_tipo * factor_tipo * (suma_micras * 1e-6) * 1.03 * densidad_ponderada
+        kg_materia_prima = (ancho_bobina / cortes) * factor_largo * factor_cantidad * (suma_micras * 1e-6) * 1.03 * densidad_ponderada
         
-        # Coste materia prima €/m formula:
+        # Coste materia prima €/m formula exacta:
         coste_materia_prima_m = kg_materia_prima * coste_kg
     else:
         kg_materia_prima = 0.0
