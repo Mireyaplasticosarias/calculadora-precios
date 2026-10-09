@@ -222,14 +222,13 @@ elif tipo_producto == "Termoformado":
     st.markdown("---")
     st.header("3. Markup y Precio de Venta")
     
-    if material_opcion == "Liso":
-        st.caption("Liso: mínimo 1,22 — máximo 1,55")
-    else:
-        st.caption("Impreso: mínimo 2 — máximo 2,46")
-        
+    st.caption("Liso: mínimo 1,22 - Impreso: mínimo 2")
+            
     st.metric(label="Markup", value=f"{markup_calculado:.3f}")
 
-    usar_manual = st.checkbox("Modificar Markup propuesto", key="termo_mod")
+
+
+    usar_manual = st.checkbox("Modificar Markup", key="termo_mod")
     
     if usar_manual:
         markup_propuesto = st.number_input(
